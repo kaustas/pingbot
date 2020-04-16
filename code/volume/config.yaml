@@ -1,0 +1,5 @@
+botid: 123456789:abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
+userid: 123456789
+hosts:
+  - "8.8.8.8:Google DNS"
+  - "77.88.8.8:Yandex DNS"

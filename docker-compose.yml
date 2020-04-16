@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+
+  pingbot_service:
+    container_name: pingbot
+    image: pingbot
+    restart: always
+    volumes:
+      - type: volume
+        source: data
+        target: /usr/src/pingbot/volume
+
+volumes:
+  data:
