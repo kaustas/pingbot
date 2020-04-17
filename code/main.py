@@ -1,6 +1,6 @@
 from telegram import Bot
 from pythonping import ping
-import sys
+import os
 import time
 import yaml
 import logging
@@ -9,7 +9,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(mn)s][%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler("output.log"),
+        # logging.FileHandler("output.log"),
         logging.StreamHandler()
     ]
 )
@@ -25,27 +25,33 @@ class address:
 
 def init():
     global bot, userid
-
-
-    with open('./volume/config.yaml') as f:
-        try:
-            docs = yaml.load_all(f, Loader=yaml.FullLoader)
-
-            for doc in docs:
-                for k, v in doc.items():
-                    if k == "botid":
-                        bot = Bot(v)
-                    elif k == "userid":
-                        if v == 123456789:
-                            logging.error("Wrong config.yaml data. Update config with correct botid and userid", extra={'mn': 'YAML'})
-                            sys.exit()
-                        else:
-                            userid = v
-                    elif k == "hosts":
-                        set_hosts(v)
-
-        except yaml.YAMLError as exc:
-            logging.error(exc, extra={'mn': 'YAML'})
+    BOT_ENV = os.getenv('BOT_ENV')
+    if BOT_ENV:
+        docs = yaml.safe_load(BOT_ENV)
+        bot = Bot(docs['botid'])
+        userid = docs['userid']
+        if userid == '123456789':
+            userid = 0
+            logging.error("Wrong botid or userid", extra={'mn': 'YAML'})
+        set_hosts(docs['hosts'])
+    else:
+        with open('./config.yaml') as f:
+            try:
+                docs = yaml.load_all(f, Loader=yaml.FullLoader)
+                for doc in docs:
+                    for k, v in doc.items():
+                        if k == "botid":
+                            bot = Bot(v)
+                        elif k == "userid":
+                            if str(v) == '123456789':
+                                userid = 0
+                                logging.error("Wrong config.yaml data. Update config with correct botid and userid", extra={'mn': 'YAML'})
+                            else:
+                                userid = v
+                        elif k == "hosts":
+                            set_hosts(v)
+            except yaml.YAMLError as exc:
+                logging.error(exc, extra={'mn': 'YAML'})
 
 
 def set_hosts(hosts):
@@ -98,14 +104,15 @@ def ping_url(url):
 
 def main():
     init()
-    logging.info("Pingbot started", extra={'mn': 'main'})
-    send_message("Pingbot started")
-    while True:
+    if userid:
+        logging.info("Pingbot started", extra={'mn': 'main'})
+        send_message("Pingbot started")
+        while True:
 
-        for host in hosts_list:
-            ping_host(host)
+            for host in hosts_list:
+                ping_host(host)
 
-        time.sleep(30)
+            time.sleep(30)
 
 
 if __name__ == '__main__':

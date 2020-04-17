@@ -2,14 +2,14 @@ version: '3.7'
 
 services:
 
-  pingbot_service:
+  bot:
     container_name: pingbot
     image: pingbot
     restart: always
-    volumes:
-      - type: volume
-        source: data
-        target: /usr/src/pingbot/volume
-
-volumes:
-  data:
+    environment:
+      BOT_ENV: |
+        botid: 123456789:abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
+        userid: 123456789
+        hosts:
+          - "8.8.8.8:Google DNS"
+          - "77.88.8.8:Yandex DNS"
